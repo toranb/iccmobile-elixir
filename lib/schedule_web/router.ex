@@ -1,6 +1,8 @@
 defmodule ScheduleWeb.Router do
   use ScheduleWeb, :router
 
+  import ScheduleWeb.Plug.Session, only: [validate_session: 2]
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,6 +10,7 @@ defmodule ScheduleWeb.Router do
     plug :put_root_layout, {ScheduleWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :validate_session
   end
 
   pipeline :api do

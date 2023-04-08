@@ -5,6 +5,7 @@ input[type="reset"] {
   color: inherit;
   border: none;
   padding: 0;
+  margin: 0;
   font: inherit;
   cursor: pointer;
   outline: inherit;
@@ -111,11 +112,7 @@ h2 {
   margin-top: 10px;
 }
 .star-container {
-  width: 10rem;
-  height: 2rem;
-}
-.star-container span {
-  cursor: pointer;
+  display: flex;
 }
 .star-group {
   display: inline-block;
@@ -139,4 +136,6 @@ h2 {
   display: inline-block;
   float: left;
 }
-.w-full { width: 100%; }
+.w-full {
+  width: 100%;
+}

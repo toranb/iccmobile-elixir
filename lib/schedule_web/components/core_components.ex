@@ -21,15 +21,18 @@ defmodule ScheduleWeb.CoreComponents do
 
   def star_rating(assigns) do
     stars = [1, 2, 3, 4, 5]
-    width = "width: 0;"
+
+    review = Enum.find(assigns.ratings, &(&1.id == assigns.session.id))
+    rating = if is_nil(review), do: 0, else: review.rating / 5 * 100
+    width = "width: #{rating}%"
 
     assigns = assign(assigns, :stars, stars)
     assigns = assign(assigns, :width, width)
 
     ~H"""
-    <div class="star-rating w-full">
+    <div class="star-rating">
       <div class="star-group" style={@width}>
-        <div class="star-container w-full">
+        <div class="star-container">
           <%= for star <- @stars do %>
             <button type="button" phx-click="rate" phx-value-id={@session.id} phx-value-star={star}>
               ★
@@ -38,7 +41,7 @@ defmodule ScheduleWeb.CoreComponents do
         </div>
       </div>
       <div class="star-group backdrop">
-        <div class="star-container w-full">
+        <div class="star-container">
           <%= for star <- @stars do %>
             <button type="button" phx-click="rate" phx-value-id={@session.id} phx-value-star={star}>
               ★
@@ -73,7 +76,7 @@ defmodule ScheduleWeb.CoreComponents do
       <div :if={@session.desc} class="description">
         <p><%= @session.desc %></p>
         <%= if @session.speaker.name != "Iowa Code Camp" do %>
-          <.star_rating session={@session} />
+          <.star_rating session={@session} ratings={@ratings} />
         <% end %>
       </div>
     </div>

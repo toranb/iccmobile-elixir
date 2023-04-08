@@ -10,6 +10,7 @@ defmodule Schedule.Application do
     children = [
       # Start the Telemetry supervisor
       ScheduleWeb.Telemetry,
+      {Schedule.Cache, name: :ratings_table},
       # Start the PubSub system
       {Phoenix.PubSub, name: Schedule.PubSub},
       # Start Finch

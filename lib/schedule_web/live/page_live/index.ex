@@ -3,28 +3,39 @@ defmodule ScheduleWeb.PageLive.Index do
 
   import Jason.Sigil
 
+  @table :ratings_table
+
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, session, socket) do
+    session_id = session["session_uuid"] || Ecto.UUID.generate()
+
     sessions =
       get_sessions()["data"]
       |> Schedule.Util.deep_atomize()
       |> Enum.with_index()
-      |> Enum.map(fn {session, i} -> Map.put(session, :id, "session#{i}") end)
+      |> Enum.map(fn {s, i} -> Map.put(s, :id, "session#{i}") end)
 
-    {:ok, assign(socket, everything: sessions)}
+    ratings = Schedule.Cache.get(@table, session_id, fn -> [] end)
+
+    {:ok, assign(socket, ratings: ratings, sessions: sessions, session_id: session_id)}
   end
 
   @impl true
-  def handle_event("rate", %{"id" => _id, "star" => _star}, socket) do
-    {:noreply, socket}
+  def handle_event("rate", %{"id" => id, "star" => star}, socket) do
+    ratings = Schedule.Cache.get(@table, socket.assigns.session_id, fn -> [] end)
+    ratings = Enum.reject(ratings, &(&1.id == id))
+    new_ratings = ratings ++ [%{id: id, rating: String.to_integer(star)}]
+    Schedule.Cache.put(@table, socket.assigns.session_id, new_ratings)
+
+    {:noreply, assign(socket, ratings: new_ratings)}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <h2>Iowa Code Camp</h2>
-    <%= for session <- @everything do %>
-      <.conference_session session={session} />
+    <%= for session <- @sessions do %>
+      <.conference_session session={session} ratings={@ratings} />
     <% end %>
     """
   end
