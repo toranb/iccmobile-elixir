@@ -19,6 +19,67 @@ defmodule ScheduleWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import ScheduleWeb.Gettext
 
+  def star_rating(assigns) do
+    stars = [1, 2, 3, 4, 5]
+    width = "width: 0;"
+
+    assigns = assign(assigns, :stars, stars)
+    assigns = assign(assigns, :width, width)
+
+    ~H"""
+    <div class="star-rating w-full">
+      <div class="star-group" style={@width}>
+        <div class="star-container w-full">
+          <%= for star <- @stars do %>
+            <button type="button" phx-click="rate" phx-value-id={@session.id} phx-value-star={star}>
+              ★
+            </button>
+          <% end %>
+        </div>
+      </div>
+      <div class="star-group backdrop">
+        <div class="star-container w-full">
+          <%= for star <- @stars do %>
+            <button type="button" phx-click="rate" phx-value-id={@session.id} phx-value-star={star}>
+              ★
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def conference_session(assigns) do
+    ~H"""
+    <div
+      id={@session.id}
+      class={"capitalize #{if @session.session == "Lunch" || @session.session == "Break", do: "session is-break", else: "session"}"}
+      phx-click={
+        JS.push("lv:clear-flash")
+        |> JS.remove_class(
+          "is-expanded",
+          to: "##{@session.id}.is-expanded"
+        )
+        |> JS.add_class("is-expanded", to: "##{@session.id}:not(.is-expanded)")
+      }
+    >
+      <small><%= @session.time %></small>
+      <h3><%= @session.session %></h3>
+      <ul :if={@session.speaker.name} class="speakers">
+        <li><%= @session.speaker.name %></li>
+      </ul>
+
+      <div :if={@session.desc} class="description">
+        <p><%= @session.desc %></p>
+        <%= if @session.speaker.name != "Iowa Code Camp" do %>
+          <.star_rating session={@session} />
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
   @doc """
   Renders a modal.
 

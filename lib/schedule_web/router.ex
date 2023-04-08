@@ -17,7 +17,7 @@ defmodule ScheduleWeb.Router do
   scope "/", ScheduleWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PageLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
