@@ -10,8 +10,6 @@ defmodule Schedule.Application do
     children = [
       # Start the Telemetry supervisor
       ScheduleWeb.Telemetry,
-      # Start the Ecto repository
-      Schedule.Repo,
       # Start the PubSub system
       {Phoenix.PubSub, name: Schedule.PubSub},
       # Start Finch
