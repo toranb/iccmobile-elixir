@@ -7,11 +7,11 @@ defmodule ScheduleWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_schedule_key",
-    signing_salt: "KTVbLpW7",
+    signing_salt: "BWhSHQyZ",
     same_site: "Lax"
   ]
 
-  socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
+  socket "/live", Phoenix.LiveView.Socket, websocket: [timeout: 45_000, connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
