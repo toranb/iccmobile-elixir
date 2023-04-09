@@ -47,7 +47,7 @@ defmodule ScheduleWeb.PageLive.Index do
   @impl true
   def render(assigns) do
     ~H"""
-    <div>
+    <div :if={Enum.count(@sessions) > 0}>
       <.pull_refresh>
         <h2>Iowa Code Camp</h2>
         <%= for session <- @sessions do %>
