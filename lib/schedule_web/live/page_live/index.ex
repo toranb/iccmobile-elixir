@@ -31,12 +31,30 @@ defmodule ScheduleWeb.PageLive.Index do
   end
 
   @impl true
+  def handle_event("refresh", _, socket) do
+    Process.sleep(1200)
+
+    new_sessions = socket.assigns.sessions |> Enum.reject(&(&1.id == "session3"))
+
+    socket =
+      socket
+      |> assign(sessions: new_sessions)
+      |> push_event("refreshed", %{})
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
-    <h2>Iowa Code Camp</h2>
-    <%= for session <- @sessions do %>
-      <.conference_session session={session} ratings={@ratings} />
-    <% end %>
+    <div>
+      <.pull_refresh>
+        <h2>Iowa Code Camp</h2>
+        <%= for session <- @sessions do %>
+          <.conference_session session={session} ratings={@ratings} />
+        <% end %>
+      </.pull_refresh>
+    </div>
     """
   end
 

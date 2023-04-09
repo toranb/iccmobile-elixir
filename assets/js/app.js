@@ -22,8 +22,90 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+let lastY = 0
+let startY = 0
+let diff = 0
+let loading = false
+const THRESHOLD = 50
+
+const delta = () => lastY - startY
+const pulling = () => startY && delta() > 0
+const safeString = (el, value) => el.style.transform = `translate3d(0px, ${value}px, 0px)`
+
+const transform = (el) => {
+  if (pulling()) {
+    safeString(el, diff)
+  } else if (loading) {
+    safeString(el, THRESHOLD)
+  } else {
+    safeString(el, 0)
+  }
+}
+
+let Hooks = {}
+Hooks.Pull = {
+  mounted() {
+    const pull = document.getElementById('pull')
+    const pullChild = document.getElementById('pull-child')
+    const setTransform = () => {
+      transform(pullChild)
+    }
+
+    setTransform()
+
+    this.handleEvent('refreshed', () => {
+      loading = false
+      setTransform()
+    })
+
+    pull.addEventListener('touchmove', (e) => {
+      if (loading) {
+        return
+      }
+
+      lastY = e.targetTouches[0].pageY
+
+      if (!pulling()) {
+        return
+      }
+
+      diff = Math.min(delta(), (THRESHOLD * 2))
+      setTransform()
+    }, false)
+
+    pull.addEventListener('touchstart', (e) => {
+      const atTop = document.body.scrollTop === 0
+
+      if (loading || !atTop) {
+        return
+      }
+
+      const y = e.targetTouches[0].pageY
+
+      lastY = y
+      startY = y
+
+      setTransform()
+    }, false)
+
+    pull.addEventListener('touchend', (e) => {
+      const refreshing = delta() >= THRESHOLD
+
+      if (refreshing) {
+        loading = true
+        this.pushEvent('refresh')
+      }
+
+      lastY = 0
+      startY = 0
+
+      setTransform()
+    }, false)
+  },
+};
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
-let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
+let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}})
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

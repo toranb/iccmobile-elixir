@@ -19,6 +19,19 @@ defmodule ScheduleWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import ScheduleWeb.Gettext
 
+  def pull_refresh(assigns) do
+    ~H"""
+      <div id="pull" class="refresh-parent pulling" phx-hook="Pull">
+        <div class="refresh-spinner">
+          <img src="/images/refresh.svg" style="height: 50px; max-height: 50px;"/>
+        </div>
+        <div id="pull-child" class="refresh-child">
+          <%= render_block(@inner_block) %>
+        </div>
+      </div>
+    """
+  end
+
   def star_rating(assigns) do
     stars = [1, 2, 3, 4, 5]
 
