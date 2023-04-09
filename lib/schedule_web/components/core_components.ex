@@ -25,7 +25,7 @@ defmodule ScheduleWeb.CoreComponents do
         <div class="refresh-spinner">
           <img src="/images/refresh.svg" style="height: 50px; max-height: 50px;"/>
         </div>
-        <div id="pull-child" class="refresh-child">
+        <div id="pull-child" class="refresh-child hide-transform">
           <%= render_block(@inner_block) %>
         </div>
       </div>
