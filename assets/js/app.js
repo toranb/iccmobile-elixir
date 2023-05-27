@@ -89,7 +89,8 @@ Hooks.Pull = {
     }, false)
 
     pull.addEventListener('touchend', (e) => {
-      const refreshing = delta() >= THRESHOLD
+      const atTop = window.scrollY === 0
+      const refreshing = atTop && delta() >= THRESHOLD
 
       if (refreshing) {
         loading = true
