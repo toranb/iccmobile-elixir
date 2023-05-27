@@ -74,7 +74,7 @@ Hooks.Pull = {
     }, false)
 
     pull.addEventListener('touchstart', (e) => {
-      const atTop = document.body.scrollTop === 0
+      const atTop = window.scrollY === 0
 
       if (loading || !atTop) {
         return
