@@ -4,17 +4,13 @@ defmodule ScheduleWeb.PageLive.Index do
   import Jason.Sigil
 
   @table :ratings_table
+  @url "https://iowacodecamp.com/data/json/"
+  @headers [{"Content-Type", "application/json"}]
 
   @impl true
   def mount(_params, session, socket) do
     session_id = session["session_uuid"] || Ecto.UUID.generate()
-
-    sessions =
-      get_sessions()["data"]
-      |> Schedule.Util.deep_atomize()
-      |> Enum.with_index()
-      |> Enum.map(fn {s, i} -> Map.put(s, :id, "session#{i}") end)
-
+    sessions = json_sessions() |> transform()
     ratings = Schedule.Cache.get(@table, session_id, fn -> [] end)
 
     {:ok, assign(socket, ratings: ratings, sessions: sessions, session_id: session_id)}
@@ -32,9 +28,9 @@ defmodule ScheduleWeb.PageLive.Index do
 
   @impl true
   def handle_event("refresh", _, socket) do
-    Process.sleep(1200)
+    Process.sleep(1000)
 
-    new_sessions = socket.assigns.sessions |> Enum.reject(&(&1.id == "session3"))
+    new_sessions = json_sessions() |> transform()
 
     socket =
       socket
@@ -56,6 +52,32 @@ defmodule ScheduleWeb.PageLive.Index do
       </.pull_refresh>
     </div>
     """
+  end
+
+  def json_sessions() do
+    Finch.build(:get, @url, @headers)
+    |> Finch.request(Schedule.Finch)
+    |> case do
+      {:ok, %Finch.Response{status: 200, body: body}} ->
+        Jason.decode(body)
+        |> case do
+          {:ok, %{"d" => %{"success" => true, "data" => data}}} ->
+            data
+
+          _ ->
+            []
+        end
+
+      _ ->
+        []
+    end
+  end
+
+  def transform(data) do
+    data
+    |> Schedule.Util.deep_atomize()
+    |> Enum.with_index()
+    |> Enum.map(fn {s, i} -> Map.put(s, :id, "session#{i}") end)
   end
 
   def get_sessions() do
