@@ -10,7 +10,8 @@ defmodule ScheduleWeb.PageLive.Index do
   @impl true
   def mount(_params, session, socket) do
     session_id = session["session_uuid"] || Ecto.UUID.generate()
-    sessions = json_sessions() |> transform()
+    # sessions = json_sessions() |> transform()
+    sessions = get_sessions() |> Map.get("data") |> transform()
     ratings = Schedule.Cache.get(@table, session_id, fn -> [] end)
 
     {:ok, assign(socket, ratings: ratings, sessions: sessions, session_id: session_id)}
